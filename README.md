@@ -4,14 +4,14 @@
 
 ## English
 
-SeedVR2 image and video super-resolution nodes for ComfyUI, accelerating SeedVR2 upscaling end to end with a TE frame-aware cache, a streaming VAE and automatic chunking.
+SeedVR2 image and video super-resolution nodes for ComfyUI, accelerating SeedVR2 upscaling end to end with TE frame-aware acceleration, a streaming VAE and automatic chunking.
 
-TE-Speed-SeedVR2 builds on ComfyUI's built-in SeedVR2 implementation (models from [SeedVR2](https://github.com/ByteDance-Seed/SeedVR)), providing a single-node workflow, a TE frame-aware DiT cache, SageAttention, a streaming VAE and automatic spatial tiling for end-to-end acceleration of SeedVR2 upscaling inside ComfyUI.
+TE-Speed-SeedVR2 builds on ComfyUI's built-in SeedVR2 implementation (models from [SeedVR2](https://github.com/ByteDance-Seed/SeedVR)), providing a single-node workflow, TE frame-aware acceleration, SageAttention, a streaming VAE and automatic spatial tiling for end-to-end acceleration of SeedVR2 upscaling inside ComfyUI.
 
 ### 1.0
 
 - Supports SeedVR2 3B / 7B, compatible with Comfy-Org `int8_convrot` and the official FP8 EMA safetensors.
-- Exclusive TE frame-aware DiT cache.
+- Exclusive TE frame-aware acceleration.
 - SageAttention variable-length attention acceleration, applied to this node's DiT only.
 - Streaming VAE: no VRAM accumulation.
 - Supports both images and video (ComfyUI `IMAGE` frame batches).
@@ -57,7 +57,7 @@ One-node restore and upscale node: resize, encode, conditioning, chunking, sampl
 - `max_long_edge`: target long edge, default 1920; scales by the input aspect ratio, no integer scale factor is exposed.
 - `seed`: random seed.
 - `steps`: sampling steps, default 1 (SeedVR2's native default is `euler` + `simple`).
-- `processing_control_value`: TE frame-cache threshold, default 0.10; `0` disables the cache.
+- `processing_control_value`: TE frame-cache threshold, default 0 (off). The cache compares whole DiT forwards, so it is only sound inside one temporal chunk; leave it 0 (it cannot warm up within a single chunk unless `steps > 1`).
 - `mode`: `quality` / `balanced` / `speed`, controls how aggressive the cache is, default `balanced`.
 - `color_correction_method`: `lab` / `wavelet` / `adain` / `none`, default `lab`; from fastest to slowest this is generally `none` → `adain` → `wavelet` → `lab`.
 - `attention_backend`: `sage` or `comfy_auto`, default `sage`.
@@ -76,14 +76,14 @@ Optional parameters:
 
 ## 中文
 
-SeedVR2 图片与视频超分辨率 ComfyUI 节点，用 TE 帧感知缓存、流式 VAE 与自动分块为 SeedVR2 放大带来全链路加速。
+SeedVR2 图片与视频超分辨率 ComfyUI 节点，用 TE 帧感知加速、流式 VAE 与自动分块为 SeedVR2 放大带来全链路加速。
 
-TE-Speed-SeedVR2 以 ComfyUI 内置的 SeedVR2 实现为基础（模型来自 [SeedVR2](https://github.com/ByteDance-Seed/SeedVR)），提供单节点全流程、TE 帧感知 DiT 缓存、SageAttention 注意力、流式 VAE 与自动空间分块，为 ComfyUI 内的 SeedVR2 放大带来全链路加速。
+TE-Speed-SeedVR2 以 ComfyUI 内置的 SeedVR2 实现为基础（模型来自 [SeedVR2](https://github.com/ByteDance-Seed/SeedVR)），提供单节点全流程、TE 帧感知加速、SageAttention 注意力、流式 VAE 与自动空间分块，为 ComfyUI 内的 SeedVR2 放大带来全链路加速。
 
 ### 1.0
 
 - 支持 SeedVR2 3B / 7B，兼容 Comfy-Org `int8_convrot` 与官方 FP8 EMA safetensors。
-- 独家 TE 帧感知 DiT 缓存。
+- 独家 TE 帧感知加速。
 - SageAttention 变长注意力加速，仅作用于本节点的 DiT。
 - 流式 VAE ：不堆积显存。
 - 支持图片与视频（ComfyUI `IMAGE` 帧批次）。
@@ -129,7 +129,7 @@ ComfyUI/models/SEEDVR2/
 - `max_long_edge`：长边目标尺寸，默认 1920；按输入宽高比缩放，不暴露整数倍率。
 - `seed`：随机种子。
 - `steps`：采样步数，默认 1（SeedVR2 原生默认 `euler` + `simple`）。
-- `processing_control_value`：TE 帧缓存阈值，默认 0.10；`0` 关闭缓存。
+- `processing_control_value`：TE 帧缓存阈值，默认 0（关闭）。缓存比较的是整次 DiT 前向，所以只在**同一个时间分块内**才成立；建议保持 0（`steps=1` 时它也无法热身）。
 - `mode`：`quality` / `balanced` / `speed`，控制缓存的激进程度，默认 `balanced`。
 - `color_correction_method`：`lab` / `wavelet` / `adain` / `none`，默认 `lab`；速度由快到慢一般为 `none` → `adain` → `wavelet` → `lab`。
 - `attention_backend`：`sage` 或 `comfy_auto`，默认 `sage`。
